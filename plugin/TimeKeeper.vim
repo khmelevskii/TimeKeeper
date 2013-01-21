@@ -78,9 +78,9 @@
 "
 " This plugin has a global dictionary so the plugin should only be loaded ones.
 "
-if !exists("s:TimeKeeperPlugin")
+if !exists("g:TimeKeeperPlugin")
 " Script Initialisation block												{{{
-	let s:TimeKeeperPlugin = 1
+	let g:TimeKeeperPlugin = 1
 
 	" global settings
 	if !exists("g:TimeKeeperAwayTimeSec")
@@ -229,8 +229,22 @@ endfunction
 "
 function! TimeKeeper_GetCurrentJobString()
 	
-	return s:current_project . '.' . s:current_job . '#' . s:TimeKeeper_GetTimeString(s:project_list[s:current_project].job[s:current_job].total_time)
+	" return s:TimeKeeper_GetTimeString(s:project_list[s:current_project].job[s:current_job].total_time)
 
+    try
+      let time = s:project_list[s:current_project].job[s:current_job].total_time
+      let el_time_mins  = (time / 60) % 60
+      let el_time_hours = (time / (60*60)) % 24
+      let el_time_days  = (time / (60*60*24))
+      
+      if (el_time_mins < 10)
+          return el_time_days . 'д ' . el_time_hours . ':0' . el_time_mins
+      else
+          return el_time_days . 'д ' . el_time_hours . ':' . el_time_mins
+        endif
+    catch /.*/
+      return ''
+    endtry
 endfunction
 "																			}}}
 " FUNCTION: TimeKeeper_GetElapsedTime() 									{{{
