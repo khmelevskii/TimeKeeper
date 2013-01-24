@@ -83,6 +83,10 @@ if !exists("g:TimeKeeperPlugin")
 	let g:TimeKeeperPlugin = 1
 
 	" global settings
+	if !exists("g:TimeKeeperStarted")
+		let g:TimeKeeperStarted = 0    			
+	endif
+
 	if !exists("g:TimeKeeperAwayTimeSec")
 		let g:TimeKeeperAwayTimeSec = 360    				" 5ive minutes and then assume that the time was not working time.
 	endif
@@ -167,6 +171,7 @@ if !exists("g:TimeKeeperPlugin")
 "
 function! TimeKeeper_StopTracking()
 	au! TimeKeeper
+    let g:TimeKeeperStarted = 0
 	call TimeKeeper_UpdateJob(s:current_project,s:current_job,(s:user_stopped_typing - s:user_started_typing))
 	call TimeKeeper_SaveTimeSheet(0)
 	
@@ -187,6 +192,8 @@ endfunction
 "      nothing.
 "
 function! TimeKeeper_StartTracking()
+    let g:TimeKeeperStarted = 1
+
 	call s:TimeKeeper_LoadTimeSheet()
 
 	call s:TimeKeeper_FindServer()
@@ -232,12 +239,21 @@ function! TimeKeeper_GetCurrentJobString()
 	" return s:TimeKeeper_GetTimeString(s:project_list[s:current_project].job[s:current_job].total_time)
 
     try
+      if (g:TimeKeeperStarted == 0)
+        return ''
+      endif
+
       let time = s:project_list[s:current_project].job[s:current_job].total_time
       let el_time_mins  = (time / 60) % 60
       let el_time_hours = (time / (60*60)) % 24
       let el_time_days  = (time / (60*60*24))
       
-      let el_time_hours = el_time_hours + (el_time_days * 24)
+      if (el_time_days != 0)
+          let el_time_days = el_time_days . 'd '
+      else
+          let el_time_days = ''
+      endif
+
       if (el_time_hours < 10)
           let el_time_hours = '0' . el_time_hours
       else
@@ -250,7 +266,7 @@ function! TimeKeeper_GetCurrentJobString()
           let el_time_mins = ':' . el_time_mins
       endif
 
-      return el_time_hours . el_time_mins
+      return el_time_days . el_time_hours . el_time_mins
     catch /.*/
       return ''
     endtry
