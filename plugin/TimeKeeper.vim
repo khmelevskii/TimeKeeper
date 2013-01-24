@@ -237,12 +237,7 @@ function! TimeKeeper_GetCurrentJobString()
       let el_time_hours = (time / (60*60)) % 24
       let el_time_days  = (time / (60*60*24))
       
-      if (el_time_days != 0)
-          let el_time_days = el_time_days . 'd '
-      else
-          let el_time_days = ''
-      endif
-
+      let el_time_hours = el_time_hours + (el_time_days * 24)
       if (el_time_hours < 10)
           let el_time_hours = '0' . el_time_hours
       else
@@ -255,7 +250,7 @@ function! TimeKeeper_GetCurrentJobString()
           let el_time_mins = ':' . el_time_mins
       endif
 
-      return el_time_days . el_time_hours . el_time_mins
+      return el_time_hours . el_time_mins
     catch /.*/
       return ''
     endtry
